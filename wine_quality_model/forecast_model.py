@@ -20,9 +20,9 @@ class WineQualityPredictor:
             'bootstrap_type': 'Bernoulli',
             'silent': True,
             'random_state': 121,
-            'depth': 6,
+            'depth': 10,
             'n_estimators': 500,
-            'learning_rate': 0.01,
+            'learning_rate': 0.1,
             'subsample': 0.85
         }
 
@@ -89,8 +89,8 @@ class WineQualityPredictor:
             'random_state': 121,
             'loss_function': 'MultiClass'
         }
-        depths = [2, 3, 4, 5, 6, 7]
-        n_estimators = [10, 50, 100, 500, 1000, 2000]
+        depths = [5, 6, 7, 8, 9, 10]
+        n_estimators = [100, 500, 1000, 2000]
         subsamples = [0.55, 0.85]
         learning_rates = [0.01, 0.1]
         search_params = []
