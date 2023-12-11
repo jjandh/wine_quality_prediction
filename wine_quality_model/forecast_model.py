@@ -46,7 +46,7 @@ class WineQualityPredictor:
         training_dataset = self.read_dataset(self.training_file_name)
         validation_dataset = self.read_dataset(self.validation_file_name)
 
-        seed = 100
+        seed = 1000
         # Make training dataset balanced
 
         training_dataset_3 = training_dataset[training_dataset['quality'] == 3]
