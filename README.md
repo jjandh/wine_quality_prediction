@@ -63,6 +63,8 @@ Output
 
 The output is weighted F1 score since data could be unbalanced and there are multiple classes. This is calculated using f1_score from sklearn.
 
+Additionally, two files predictions.csv and actuals.csv are saved in the same folder as main.py which have the model predictions and the actuals from the test data. These can then be used by the user to perform any other metrics.
+
    
 
 
