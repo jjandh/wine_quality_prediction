@@ -3,8 +3,6 @@ import numpy as np
 import copy
 from catboost import CatBoostClassifier
 from dask.distributed import Client
-from sklearn.utils import resample
-from sklearn.model_selection import train_test_split
 import sklearn
 
 
@@ -21,11 +19,12 @@ class WineQualityPredictor:
             'bootstrap_type': 'Bernoulli',
             'silent': True,
             'random_state': 121,
-            'depth': 2,
-            'n_estimators': 2000,
+            'depth': 6,
+            'n_estimators': 500,
             'learning_rate': 0.1,
-            'subsample': 0.55,
-            'eval_metric': 'TotalF1'
+            'subsample': 0.85,
+            'eval_metric': 'TotalF1',
+            'auto_class_weights': 'SqrtBalanced'
         }
 
         self.X_train = None
@@ -46,65 +45,8 @@ class WineQualityPredictor:
         training_dataset = self.read_dataset(self.training_file_name)
         validation_dataset = self.read_dataset(self.validation_file_name)
 
-        seed = 1000
-        # Make training dataset balanced
-
-        training_dataset_3 = training_dataset[training_dataset['quality'] == 3]
-        training_dataset_4 = training_dataset[training_dataset['quality'] == 4]
-        training_dataset_5 = training_dataset[training_dataset['quality'] == 5]
-        training_dataset_6 = training_dataset[training_dataset['quality'] == 6]
-        training_dataset_7 = training_dataset[training_dataset['quality'] == 7]
-        training_dataset_8 = training_dataset[training_dataset['quality'] == 8]
-        n_samples = 520
-        training_dataset_3_ = resample(training_dataset_3, n_samples=n_samples, replace=True, random_state=seed)
-        training_dataset_4_ = resample(training_dataset_4, n_samples=n_samples, replace=True, random_state=seed)
-        training_dataset_7_ = resample(training_dataset_7, n_samples=n_samples, replace=True, random_state=seed)
-        training_dataset_8_ = resample(training_dataset_8, n_samples=n_samples, replace=True, random_state=seed)
-
-        training_dataset_5_ = training_dataset_5.sample(n=n_samples).reset_index(drop=True)
-        training_dataset_6_ = training_dataset_6.sample(n=n_samples).reset_index(drop=True)
-
-        training_dataset_final = pd.concat([
-            training_dataset_3_,
-            training_dataset_4_,
-            training_dataset_5_,
-            training_dataset_6_,
-            training_dataset_7_,
-            training_dataset_8_,
-        ]).reset_index(drop=True)
-
-        training_dataset_final = training_dataset_final[training_dataset.columns]
-
-        # Make validation dataset balanced
-
-        validation_dataset_3 = validation_dataset[validation_dataset['quality'] == 3]
-        validation_dataset_4 = validation_dataset[validation_dataset['quality'] == 4]
-        validation_dataset_5 = validation_dataset[validation_dataset['quality'] == 5]
-        validation_dataset_6 = validation_dataset[validation_dataset['quality'] == 6]
-        validation_dataset_7 = validation_dataset[validation_dataset['quality'] == 7]
-        validation_dataset_8 = validation_dataset[validation_dataset['quality'] == 8]
-        n_samples = 65
-        validation_dataset_3_ = resample(validation_dataset_3, n_samples=n_samples, replace=True, random_state=seed)
-        validation_dataset_4_ = resample(validation_dataset_4, n_samples=n_samples, replace=True, random_state=seed)
-        validation_dataset_7_ = resample(validation_dataset_7, n_samples=n_samples, replace=True, random_state=seed)
-        validation_dataset_8_ = resample(validation_dataset_8, n_samples=n_samples, replace=True, random_state=seed)
-
-        validation_dataset_5_ = validation_dataset_5.sample(n=n_samples).reset_index(drop=True)
-        validation_dataset_6_ = validation_dataset_6.sample(n=n_samples).reset_index(drop=True)
-
-        validation_dataset_final = pd.concat([
-            validation_dataset_3_,
-            validation_dataset_4_,
-            validation_dataset_5_,
-            validation_dataset_6_,
-            validation_dataset_7_,
-            validation_dataset_8_,
-        ]).reset_index(drop=True)
-
-        validation_dataset_final = validation_dataset_final[training_dataset.columns]
-
-        self.training_dataset_final = training_dataset_final
-        self.validation_dataset_final = validation_dataset_final
+        self.training_dataset_final = training_dataset
+        self.validation_dataset_final = validation_dataset
         self.prepare_calibration_data()
 
     def prepare_calibration_data(self):
@@ -116,7 +58,7 @@ class WineQualityPredictor:
 
         self.X_train = X_train
         self.y_train = y_train
-        self.X_test = X_test
+        self.X_test = X_test[X_train.columns]
         self.y_test = y_test
 
     @staticmethod
@@ -126,7 +68,9 @@ class WineQualityPredictor:
             'bootstrap_type': 'Bernoulli',
             'silent': True,
             'random_state': 121,
-            'loss_function': 'MultiClass'
+            'loss_function': 'MultiClass',
+            'eval_metric': 'TotalF1',
+            'use_class_weights': 'SqrtBalanced'
         }
         depths = [5, 6, 7, 8, 9, 10]
         n_estimators = [100, 500, 1000, 2000]
@@ -151,7 +95,6 @@ class WineQualityPredictor:
         cv_results = []
         scores = []
         for params in search_params:
-            params['eval_metric'] = 'TotalF1'
             model = CatBoostClassifier(**params)
             model.fit(X_train, y_train, eval_set=(X_test, y_test), use_best_model=True)
             pred = model.predict(X_test)
