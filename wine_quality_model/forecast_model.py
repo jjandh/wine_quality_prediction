@@ -23,7 +23,8 @@ class WineQualityPredictor:
             'depth': 2,
             'n_estimators': 100,
             'learning_rate': 0.1,
-            'subsample': 0.55
+            'subsample': 0.55,
+            'eval_metric': 'TotalF1'
         }
 
         self.X_train = None
