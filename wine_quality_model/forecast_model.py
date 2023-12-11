@@ -31,6 +31,7 @@ class WineQualityPredictor:
         self.X_test = None
         self.y_test = None
         self.training_dataset_final = None
+        self.validation_dataset_final = None
 
         self.process_data()
 
@@ -42,14 +43,16 @@ class WineQualityPredictor:
     def process_data(self):
         training_dataset = self.read_dataset(self.training_file_name)
         validation_dataset = self.read_dataset(self.validation_file_name)
-        training_dataset = pd.concat([training_dataset, validation_dataset])
+
+        # Make training dataset balanced
+
         training_dataset_3 = training_dataset[training_dataset['quality'] == 3]
         training_dataset_4 = training_dataset[training_dataset['quality'] == 4]
         training_dataset_5 = training_dataset[training_dataset['quality'] == 5]
         training_dataset_6 = training_dataset[training_dataset['quality'] == 6]
         training_dataset_7 = training_dataset[training_dataset['quality'] == 7]
         training_dataset_8 = training_dataset[training_dataset['quality'] == 8]
-        n_samples = 580
+        n_samples = 520
         training_dataset_3_ = resample(training_dataset_3, n_samples=n_samples, replace=True, random_state=121)
         training_dataset_4_ = resample(training_dataset_4, n_samples=n_samples, replace=True, random_state=121)
         training_dataset_7_ = resample(training_dataset_7, n_samples=n_samples, replace=True, random_state=121)
@@ -68,13 +71,46 @@ class WineQualityPredictor:
         ]).reset_index(drop=True)
 
         training_dataset_final = training_dataset_final[training_dataset.columns]
+
+        # Make validation dataset balanced
+
+        validation_dataset_3 = validation_dataset[validation_dataset['quality'] == 3]
+        validation_dataset_4 = validation_dataset[validation_dataset['quality'] == 4]
+        validation_dataset_5 = validation_dataset[validation_dataset['quality'] == 5]
+        validation_dataset_6 = validation_dataset[validation_dataset['quality'] == 6]
+        validation_dataset_7 = validation_dataset[validation_dataset['quality'] == 7]
+        validation_dataset_8 = validation_dataset[validation_dataset['quality'] == 8]
+        n_samples = 65
+        validation_dataset_3_ = resample(validation_dataset_3, n_samples=n_samples, replace=True, random_state=121)
+        validation_dataset_4_ = resample(validation_dataset_4, n_samples=n_samples, replace=True, random_state=121)
+        validation_dataset_7_ = resample(validation_dataset_7, n_samples=n_samples, replace=True, random_state=121)
+        validation_dataset_8_ = resample(validation_dataset_8, n_samples=n_samples, replace=True, random_state=121)
+
+        validation_dataset_5_ = validation_dataset_5.sample(n=n_samples).reset_index(drop=True)
+        validation_dataset_6_ = validation_dataset_6.sample(n=n_samples).reset_index(drop=True)
+
+        validation_dataset_final = pd.concat([
+            validation_dataset_3_,
+            validation_dataset_4_,
+            validation_dataset_5_,
+            validation_dataset_6_,
+            validation_dataset_7_,
+            validation_dataset_8_,
+        ]).reset_index(drop=True)
+
+        validation_dataset_final = validation_dataset_final[training_dataset.columns]
+
         self.training_dataset_final = training_dataset_final
+        self.validation_dataset_final = validation_dataset_final
         self.prepare_calibration_data()
 
     def prepare_calibration_data(self):
         X = self.training_dataset_final.copy()
         y = X.pop('quality')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=121)
+        X_train, y_train = X, y
+        X_test = self.validation_dataset_final.copy()
+        y_test = X_test.pop('quality')
+
         self.X_train = X_train
         self.y_train = y_train
         self.X_test = X_test
