@@ -20,10 +20,10 @@ class WineQualityPredictor:
             'bootstrap_type': 'Bernoulli',
             'silent': True,
             'random_state': 121,
-            'depth': 10,
-            'n_estimators': 500,
+            'depth': 2,
+            'n_estimators': 100,
             'learning_rate': 0.1,
-            'subsample': 0.85
+            'subsample': 0.55
         }
 
         self.X_train = None
