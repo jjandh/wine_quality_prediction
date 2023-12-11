@@ -163,7 +163,7 @@ class WineQualityPredictor:
     def calibrate_model(self):
         X_train, X_test, y_train, y_test = self.X_train, self.X_test, self.y_train, self.y_test
         model = CatBoostClassifier(**self.model_params)
-        model.fit(X_train, y_train, eval_set=(X_test, y_test), use_best_model=True)
+        model.fit(X_train, y_train, eval_set=(X_test, y_test), verbose=True, use_best_model=True)
         self.model = model
 
     def calibrate_model_cluster(self):
