@@ -36,6 +36,7 @@ def main(test_file=None, use_cluster=False):
     predictions = predictor.predict(X_test)
     predictions = pd.DataFrame(predictions, index=y_test.index)[0]
     predictions.to_csv('predictions.csv')
+    y_test.to_csv('actuals.csv')
     f1score = f1_score(y_test, predictions, average='weighted')
     print('F1 Score of test data is ', f1score)
 
