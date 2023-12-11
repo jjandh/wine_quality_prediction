@@ -17,11 +17,12 @@ class WineQualityPredictor:
         # To re-optimize please use run_cross_validation()
         self.model_params = {
             'boosting_type': 'Ordered',
+            'loss_function': 'MultiClass',
             'bootstrap_type': 'Bernoulli',
             'silent': True,
             'random_state': 121,
             'depth': 2,
-            'n_estimators': 100,
+            'n_estimators': 2000,
             'learning_rate': 0.1,
             'subsample': 0.55,
             'eval_metric': 'TotalF1'
@@ -45,6 +46,7 @@ class WineQualityPredictor:
         training_dataset = self.read_dataset(self.training_file_name)
         validation_dataset = self.read_dataset(self.validation_file_name)
 
+        seed = 100
         # Make training dataset balanced
 
         training_dataset_3 = training_dataset[training_dataset['quality'] == 3]
@@ -54,10 +56,10 @@ class WineQualityPredictor:
         training_dataset_7 = training_dataset[training_dataset['quality'] == 7]
         training_dataset_8 = training_dataset[training_dataset['quality'] == 8]
         n_samples = 520
-        training_dataset_3_ = resample(training_dataset_3, n_samples=n_samples, replace=True, random_state=121)
-        training_dataset_4_ = resample(training_dataset_4, n_samples=n_samples, replace=True, random_state=121)
-        training_dataset_7_ = resample(training_dataset_7, n_samples=n_samples, replace=True, random_state=121)
-        training_dataset_8_ = resample(training_dataset_8, n_samples=n_samples, replace=True, random_state=121)
+        training_dataset_3_ = resample(training_dataset_3, n_samples=n_samples, replace=True, random_state=seed)
+        training_dataset_4_ = resample(training_dataset_4, n_samples=n_samples, replace=True, random_state=seed)
+        training_dataset_7_ = resample(training_dataset_7, n_samples=n_samples, replace=True, random_state=seed)
+        training_dataset_8_ = resample(training_dataset_8, n_samples=n_samples, replace=True, random_state=seed)
 
         training_dataset_5_ = training_dataset_5.sample(n=n_samples).reset_index(drop=True)
         training_dataset_6_ = training_dataset_6.sample(n=n_samples).reset_index(drop=True)
@@ -82,10 +84,10 @@ class WineQualityPredictor:
         validation_dataset_7 = validation_dataset[validation_dataset['quality'] == 7]
         validation_dataset_8 = validation_dataset[validation_dataset['quality'] == 8]
         n_samples = 65
-        validation_dataset_3_ = resample(validation_dataset_3, n_samples=n_samples, replace=True, random_state=121)
-        validation_dataset_4_ = resample(validation_dataset_4, n_samples=n_samples, replace=True, random_state=121)
-        validation_dataset_7_ = resample(validation_dataset_7, n_samples=n_samples, replace=True, random_state=121)
-        validation_dataset_8_ = resample(validation_dataset_8, n_samples=n_samples, replace=True, random_state=121)
+        validation_dataset_3_ = resample(validation_dataset_3, n_samples=n_samples, replace=True, random_state=seed)
+        validation_dataset_4_ = resample(validation_dataset_4, n_samples=n_samples, replace=True, random_state=seed)
+        validation_dataset_7_ = resample(validation_dataset_7, n_samples=n_samples, replace=True, random_state=seed)
+        validation_dataset_8_ = resample(validation_dataset_8, n_samples=n_samples, replace=True, random_state=seed)
 
         validation_dataset_5_ = validation_dataset_5.sample(n=n_samples).reset_index(drop=True)
         validation_dataset_6_ = validation_dataset_6.sample(n=n_samples).reset_index(drop=True)
