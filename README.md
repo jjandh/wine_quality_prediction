@@ -2,7 +2,7 @@
 
 This is a model to predict the quality of wine based on certain features. The model is based on CatBoostClassifier and runs under multiclass mode to predict the quality of wine. CatBoostClassifier is a tree based model that uses gradient boosting. The model parameters such as number of estimators, depth of the trees, learning rate and subsample are optimized using cross validation. By default, the model uses pre-optimized values. However, the user can re-optimize the parameters in case training or validation dataset has changed using run_cross_validation() method in the model.
 
-Training and validation datasets are unbalanced so the model implicitly resamples/subsamples classes using a randomization seed to ensure that the datasets used for calibration and validation are balanced. 
+Training and validation datasets are unbalanced so we use auto_weight_classes = SqrtBalanced in CatBoostClassifier so that all the classes get equal representation in the training and validation. This appears to be an important aspect of the model.
 
 Installation
 ------------
